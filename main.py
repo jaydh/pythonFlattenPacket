@@ -1,52 +1,24 @@
 from string import Template
 
 
-class FlattenedPacket(dict):
-    # Python dict ordering arbitrary but we want to print consistently by
-    # sorting keys
-    def __repr__(self):
-        res = "{"
-        for i, key in enumerate(sorted(self.keys())):
-            res += (
-                Template("'$k': $v, ").substitute(k=key, v=self[key])
-                if (i < len(self.keys()) - 1)
-                else Template("'$k': $v").substitute(k=key, v=self[key])
-            )
-        res += "}"
-        return res
-
-
-class PacketManager:
-    def __init__(self, delimiter="."):
-        self.data = []
-        self.delimiter = delimiter
-
-    def add(self, input_packet):
-        validate_packet(input_packet)
-        flattened = flatten_packet(input_packet, self.delimiter)
-        self.data.append(flattened)
-
-    def __repr__(self):
-        res = ""
-        for packet in self.data:
-            res += repr(packet)
-        return res
-
-
 def validate_packet(input_packet):
     if not isinstance(input_packet, dict):
         raise TypeError(
             Template("Invalid packet: $p").substitute(p=input_packet)
         )
 
-    for value in input_packet:
+    for value in input_packet.values():
         if isinstance(value, dict):
             validate_packet(value)
         else:
-            if not isinstance(input_packet, (dict, float, int, str)):
+            if not isinstance(value, (dict, float, int, str)):
                 raise TypeError(
-                    Template("Invalid packet: $p").substitute(p=input_packet)
+                    Template("Invalid value in packet: $p").substitute(
+                        p=input_packet)
                 )
+
+# could be staticmethods on PacketManger class, but we want to be able to invoke
+# flattened = flatten_packet(packet) and print(flattened)  per prompt
 
 
 def flatten_packet(input_packet, delimiter="."):
@@ -95,3 +67,35 @@ def flatten_packet_recursive(
             flattened[flat_key] = value
 
     return flattened
+
+
+class FlattenedPacket(dict):
+    # Python dict ordering is arbitrary but we want to print consistently by
+    # sorting keys
+    def __repr__(self):
+        res = "{"
+        for i, key in enumerate(sorted(self.keys())):
+            res += (
+                Template("'$k': $v, ").substitute(k=key, v=self[key])
+                if (i < len(self.keys()) - 1)
+                else Template("'$k': $v").substitute(k=key, v=self[key])
+            )
+        res += "}"
+        return res
+
+
+class PacketManager:
+    def __init__(self, delimiter="."):
+        self.data = []
+        self.delimiter = delimiter
+
+    def add(self, input_packet):
+        validate_packet(input_packet)
+        flattened = flatten_packet(input_packet, self.delimiter)
+        self.data.append(flattened)
+
+    def __repr__(self):
+        res = ""
+        for packet in self.data:
+            res += repr(packet)
+        return res

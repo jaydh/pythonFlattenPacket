@@ -1,9 +1,11 @@
 import unittest
-from main import flatten_packet, flatten_packet_recursive
+from main import flatten_packet, flatten_packet_recursive, validate_packet
 import io
 import sys
 
-packet = {"a": 1, "b": 2, "c": {"d": 3, "e": {"f": 4}, "g": 5}}
+small_packet = {"a": 1, "b": 2, "c": {"d": 3, "e": {"f": 4}, "g": 5}}
+
+small_packet_expected_output = {"a": 1, "b": 2, "c.d": 3, "c.e.f": 4, "c.g": 5}
 
 jumbled_small_packet = {
     "c": {
@@ -46,26 +48,27 @@ deep_nested_packet = input_json = {
 class FlattenTest(unittest.TestCase):
     def test_small_packet(self):
         self.assertEqual(
-            flatten_packet(packet),
-            {"a": 1, "b": 2, "c.d": 3, "c.e.f": 4, "c.g": 5},
+            flatten_packet(small_packet),
+            small_packet_expected_output,
         )
 
     def test_small_packet_recursive(self):
         self.assertEqual(
-            flatten_packet_recursive(packet),
-            {"a": 1, "b": 2, "c.d": 3, "c.e.f": 4, "c.g": 5},
+            flatten_packet_recursive(small_packet),
+            small_packet_expected_output,
         )
 
     def test_jumbled_small_packet(self):
         self.assertEqual(
-            flatten_packet(packet),
-            {"a": 1, "b": 2, "c.d": 3, "c.e.f": 4, "c.g": 5},
+            flatten_packet(small_packet),
+            small_packet_expected_output,
         )
 
     def test_jumbled_small_packet_recursive(self):
         self.assertEqual(
-            flatten_packet_recursive(packet),
-            {"a": 1, "b": 2, "c.d": 3, "c.e.f": 4, "c.g": 5},
+            flatten_packet_recursive(small_packet),
+            small_packet_expected_output,
+
         )
 
     def test_float_packet(self):
@@ -95,13 +98,12 @@ class FlattenTest(unittest.TestCase):
 
 class PrintTest(unittest.TestCase):
     def test_small_packet(self):
-        captured_output = io.StringIO()  # Create StringIO object
-        sys.stdout = captured_output  # and redirect stdout.
-
-        flattened = flatten_packet(packet)
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        flattened = flatten_packet(small_packet)
         print(flattened, end="")
 
-        sys.stdout = sys.__stdout__  # Reset redirect.
+        sys.stdout = sys.__stdout__
 
         self.assertEqual(
             captured_output.getvalue(),
@@ -109,10 +111,10 @@ class PrintTest(unittest.TestCase):
         )
 
     def test_small_packet_recursive(self):
-        captured_output = io.StringIO()  # Create StringIO object
-        sys.stdout = captured_output  # and redirect stdout.
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
 
-        flattened = flatten_packet_recursive(packet)
+        flattened = flatten_packet_recursive(small_packet)
         print(flattened, end="")
 
         sys.stdout = sys.__stdout__  # Reset redirect.
@@ -121,6 +123,17 @@ class PrintTest(unittest.TestCase):
             captured_output.getvalue(),
             "{'a': 1, 'b': 2, 'c.d': 3, 'c.e.f': 4, 'c.g': 5}",
         )
+
+
+class ValidateTest(unittest.TestCase):
+    def test_not_dict(self):
+        self.assertRaises(TypeError, validate_packet, [])
+
+    def test_dict_with_list(self):
+        self.assertRaises(TypeError, validate_packet, {"a": 1, "b": []})
+
+    def test_small_packet(self):
+        validate_packet(small_packet)
 
 
 unittest.main()
