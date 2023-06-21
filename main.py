@@ -7,13 +7,20 @@ def validate_packet(input_packet: dict):
             Template("Invalid packet: $p").substitute(p=input_packet)
         )
 
-    for value in input_packet.values():
+    for key, value in input_packet.items():
         if isinstance(value, dict):
             validate_packet(value)
         else:
+            if not isinstance(key, str):
+                raise TypeError(
+                    Template("Invalid key in packet: $k. Packet = $p").substitute(
+                        k=key, p=input_packet)
+                )
+
             if not isinstance(value, (dict, float, int, str)):
                 raise TypeError(
-                    Template("Invalid value in packet: $p").substitute(
+                    Template("Invalid value in packet: $v. Packet = $p").substitute(
+                        v=value,
                         p=input_packet)
                 )
 

@@ -3,7 +3,17 @@ from main import flatten_packet, flatten_packet_recursive, validate_packet
 import io
 import sys
 
-small_packet = {"a": 1, "b": 2, "c": {"d": 3, "e": {"f": 4}, "g": 5}}
+small_packet = {
+    'a': 1,
+    'b': 2,
+    'c': {
+        'd': 3,
+        'e': {
+            'f': 4
+        },
+        'g': 5
+    }
+}
 
 small_packet_expected_output = {"a": 1, "b": 2, "c.d": 3, "c.e.f": 4, "c.g": 5}
 
@@ -134,6 +144,9 @@ class ValidateTest(unittest.TestCase):
 
     def test_small_packet(self):
         validate_packet(small_packet)
+
+    def test_dict_with_bad_key(self):
+        self.assertRaises(TypeError, validate_packet, {2: 1})
 
 
 unittest.main()
