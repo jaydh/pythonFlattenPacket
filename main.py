@@ -31,13 +31,13 @@ def validate_packet(input_packet: dict):
 def flatten_packet(input_packet: dict, delimiter: str = "."):
     validate_packet(input_packet)
     flattened = FlattenedPacket()
-    stack = [{"obj": input_packet, "prefix": ""}]
+    stack = [{"dict": input_packet, "prefix": ""}]
 
-    # Push nested objects onto stack until we have flattened keys
+    # Push nested dicts onto stack until we have flattened keys
     while stack:
-        current_obj, prefix = stack.pop().values()
+        current_dict, prefix = stack.pop().values()
 
-        for key, value in current_obj.items():
+        for key, value in current_dict.items():
             flat_key = (
                 Template("$p$d$k").substitute(p=prefix, d=delimiter, k=key)
                 if (prefix)
@@ -45,7 +45,7 @@ def flatten_packet(input_packet: dict, delimiter: str = "."):
             )
 
             if isinstance(value, dict):
-                stack.append({"obj": value, prefix: flat_key})
+                stack.append({"dict": value, prefix: flat_key})
             else:
                 flattened[flat_key] = value
     return flattened
