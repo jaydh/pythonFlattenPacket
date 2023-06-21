@@ -80,6 +80,7 @@ class FlattenedPacket(dict):
     # Python dict ordering is arbitrary but we want to print consistently by
     # sorting keys
     def __repr__(self):
+        # Can replace with return dict.__repr__(self) to fail tests
         res = "{"
         for i, key in enumerate(sorted(self.keys())):
             res += (
