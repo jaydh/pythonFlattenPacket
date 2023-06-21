@@ -1,7 +1,7 @@
 from string import Template
 
 
-def validate_packet(input_packet):
+def validate_packet(input_packet: dict):
     if not isinstance(input_packet, dict):
         raise TypeError(
             Template("Invalid packet: $p").substitute(p=input_packet)
@@ -21,7 +21,7 @@ def validate_packet(input_packet):
 # flattened = flatten_packet(packet) and print(flattened)  per prompt
 
 
-def flatten_packet(input_packet, delimiter="."):
+def flatten_packet(input_packet: dict, delimiter: str = "."):
     validate_packet(input_packet)
     flattened = FlattenedPacket()
     stack = [{"obj": input_packet, "prefix": ""}]
@@ -45,7 +45,7 @@ def flatten_packet(input_packet, delimiter="."):
 
 
 def flatten_packet_recursive(
-    input_packet, prefix="", delimiter=".", validated_packet=False
+        input_packet: dict, prefix: str = "", delimiter: str = ".", validated_packet: bool = False
 ):
     if not validated_packet:
         validate_packet(input_packet)
@@ -85,11 +85,11 @@ class FlattenedPacket(dict):
 
 
 class PacketManager:
-    def __init__(self, delimiter="."):
+    def __init__(self, delimiter: str = "."):
         self.data = []
         self.delimiter = delimiter
 
-    def add(self, input_packet):
+    def add(self, input_packet: dict):
         validate_packet(input_packet)
         flattened = flatten_packet(input_packet, self.delimiter)
         self.data.append(flattened)
